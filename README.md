@@ -12,3 +12,6 @@ When requested, input the number of piece's to add and their position (expressed
 # Max score
 with this naive algorithm the AI can reach up to 80K in score
 however in the second version, an optimization was added that increased maximum score all the way to 130k
+
+# Credits
+All credits goes to AnasImloul, I have just added a user input in the program routine
