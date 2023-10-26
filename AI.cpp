@@ -62,7 +62,7 @@ MoveTracker maxsearch(long *grid, int rows, int columns, Moves* moves, int moves
         	if (!next_move.blocked){
         		move_blocked = false;
         		
-        		random_add(next_grid, rows, columns);
+        		//random_add(next_grid, rows, columns);
         		
         		MoveTracker next_depth = maxsearch(next_grid, rows, columns, moves, moves_count, depth - 1);
         		

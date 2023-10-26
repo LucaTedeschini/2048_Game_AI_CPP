@@ -235,18 +235,33 @@ Move Right(long* grid, const int &rows, const int &columns){
 
 
 
-void random_add(long* grid, int rows, int columns){
+
+void player_add(long* grid, int rows, int columns){
 	
-	int value = 2;
-	
-	int size = rows*columns;
-	
-	int start = rand()%size;
-	
-	for (int i = 0; i<size; i++){
-		if (grid[(start + i)%size] == 0){ 
-			grid[(start + i)%size] = value;
-			break;
+
+	int number;
+
+	std::cout<<"Insert the number of pieces to add: ";
+	std::cin>>number;
+	for (int i=0; i<number; i++){
+		int value;
+		std::cout<<"Insert the piece's value: ";
+		std::cin>>value;
+		int x,y;
+		std::cout<<"Insert coord x: ";
+		std::cin>>x;
+		std::cout<<"Insert coord y: ";
+		std::cin>>y;
+		int position = x + ((y-1)*4) - 1;
+
+
+		if (grid[position] == 0)
+			grid[position] = value;
+		else {
+			i -= 1;
+			std::cout<<"Posizione errata, riprova\n";
 		}
+
 	}
+	
 }

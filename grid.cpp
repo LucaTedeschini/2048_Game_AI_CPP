@@ -1,15 +1,30 @@
-#include "dynamic.cpp"
-#include "move.cpp"
 #include <cstring>
 #include <iostream>
 #include <stdlib.h> 
 #include<vector>
 #include<string>
+#include "MoveObjects.cpp"
+#include "moves.cpp"
+#include "AI.cpp"
 
 
 
 typedef Move (*Moves) (long* grid, const int &rows, const int &columns);
 
+
+int empty(long* grid, int rows, int columns){
+	
+	int zero = 0;
+	
+	int size = rows*columns;
+	
+	for (int i = 0;i<size; i++){
+		zero += (grid[i]==0);
+	}
+	return zero;
+	
+	
+}
 
 
 int digit(long number){
@@ -79,7 +94,7 @@ public:
 		grid = (long*) malloc(sizeof(long)*rows*columns);
 		memset(grid, 0,sizeof(grid));	
 		
-		for (int i = 0; i<2;i++) add();
+		for (int i = 0; i<2;i++) add(false);
 		
 		score = 0;
 	}
@@ -91,7 +106,7 @@ public:
 		grid = move.grid;
 		
 		score += move.score;
-		add();
+		add(false);
 	}
 	
 	void down(){
@@ -101,7 +116,7 @@ public:
 		
 		grid = move.grid;
 		score += move.score;
-		add();
+		add(false);
 	}
 	
 	void left(){
@@ -110,7 +125,7 @@ public:
 		
 		grid = move.grid;
 		score += move.score;
-		add();
+		add(false);
 	}
 	
 	void right(){
@@ -120,35 +135,82 @@ public:
 		
 		grid = move.grid;
 		score += move.score;
-		add();
+		add(false);
 		
 	}
 	
-	void add(){
-		random_add(grid, rows, columns,2);
+	void add(bool gaming){
+		player_add(grid, rows, columns);
 	}
 	
 	
-	int next_move(int depth){
-
+	int next_move(){
 	
-	MoveTracker best_move = maxsearch(grid, rows, columns, moves, 4, depth);
-
-	return best_move.path[best_move.path.size() - 1]; }
-	
-	
-	void play(long rounds, int depth, bool show = false){
-		for (int round = 1; round <= rounds; round++){
+		int depth;
 		
-			if (show){
-				show_grid(grid,rows,columns);
-				std::cout << "Score: " << score << "\n\n";
-				}
+		if (rows==4 && columns == 4){
+			depth =  2*(1 + (16 - empty(grid, rows, columns))/4);
+			
+			depth = (depth <= 10 ? depth : 10);
+			depth = (depth >= 3 ? depth : 3);
+		}
+		
+		else{
+			depth = 6;
+		}
+		
+		
+		int trials = 17;
+	
+		int* move_count = (int*) malloc(sizeof(int)*trials);
+		memset(move_count,0,sizeof(move_count));
+		
+		int max_arg=0 ,max_index=0;
+		
+		for (int i = 0; i<trials; i++){
+		
+			MoveTracker best_move = maxsearch(grid, rows, columns, moves, 4, depth);
+			
+			int move = best_move.path[best_move.path.size() - 1];
+			
+			move_count[move]++;
+			
+			if (move_count[move] > max_arg){
+				max_arg = move_count[move];
+				max_index = move;
+			};
+		
+		}
+		
+		free(move_count);
+		
+		return max_index;
+	}
+	
+	
+	
+	void play(long rounds, bool show = true){
+		int round;
+		for (round = 1; round <= rounds; round++){
+		
 
-			int next = next_move(depth);
+			int next = next_move();
+
+			
+			//{Up,Down,Left,Right}
+			if (next == 0)
+				std::cout<<"##UP##"<<std::endl;
+			if (next == 1)
+				std::cout<<"##DOWN##"<<std::endl;
+			if (next == 2)
+				std::cout<<"##LEFT##"<<std::endl;
+			if (next == 3)
+				std::cout<<"##RIGHT##"<<std::endl;
+
+			std::cout<<"\n\n\n";
+
 
 			Move move = moves[next](grid, rows, columns);
-			
 
 			grid = move.grid;
 			score += move.score;
@@ -158,8 +220,23 @@ public:
 				break;
 			}
 
-			add();
+			if (show){
+				show_grid(grid,rows,columns);
+				std::cout << "Score: " << score << "\n";
+			}
+
+
+			add(true);
+
+			if (show){
+				show_grid(grid,rows,columns);
+				std::cout << "Score: " << score << "\n";
+			}
+
+			std::cin;
 		}
+		
+		if (round == rounds) std::cout << "Reached a total score of " << score << " after playing " << std::to_string(round) << " rounds." << std::endl;
 	}
 	
 	
@@ -169,7 +246,7 @@ public:
 		
 		std::string result = "";
 		for (int i = 0; i<g.rows*g.columns; i++){
-			result = result + std::to_string(g.grid[i]) + white_spaces(2 + max_digit - digit(g.grid[i])) + (((i==0 && g.columns != 1) || (i+1)%g.columns) ? " " : "\n");
+			result = result + std::to_string(g.grid[i]) + white_spaces(max_digit - digit(g.grid[i])) + (((i==0 && g.columns != 1) || (i+1)%g.columns) ? " " : "\n");
 		}
 		result += "Score: " + std::to_string(g.score);
 		
